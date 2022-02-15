@@ -1,36 +1,40 @@
-Dim str_from
-Dim str_to
-Dim Input
-
-Dim objFS
-Dim objTextFrom
-Dim objTextTo
-Dim str_from_data
-Dim str_to_data
-Dim strFromFile
-Dim strToFile
+Option Explicit
 
 ' -------------------------------------------------------------- '
 '初期設定
 
-Dim VBAFilePath : VBAFilePath = "E:\趣味\AutomationCopyToCD\VBA\CopyXlsx.xlsm" '絶対パスで指定する
+'絶対パスで指定する
+Dim VBAFilePath : VBAFilePath = "E:\趣味\AutomationCopyToCD\VBA\CopyXlsx.xlsm"
+
+'コピー先ドライブを指定する
+Dim checkDrive : checkDrive = "E"
+
+'コピー元パス格納ファイルのパスを指定する
+Dim dataPathPC : dataPathPC = "E:\趣味\AutomationCopyToCD\data\PC_tg_path.txt"
+
+'コピー先パス格納ファイルのパスを指定する
+Dim dataPathCD : dataPathCD = "E:\趣味\AutomationCopyToCD\data\CD_tg_path.txt"
 
 ' -------------------------------------------------------------- '
 
 ' -------------------------------------------------------------- '
 '動作選択
 Dim flag
-flag = MsgBox("CDはしっかりセットしましたか？", vbYesNo+vbQuestion, "info")
+flag = MsgBox("CDはしっかりセットしましたか？" &vbCrLf& "プリンターは電源つけましたか？", vbYesNo+vbQuestion, "info")
 If flag = vbYes Then
 
     ' ------------------------ '
     'ターゲットpathを読み込む
-    path = ReadPath()
+    Dim path : path = ReadPath(dataPathPC, dataPathCD)
     ' ------------------------ '
 
     ' ------------------------ '
     'コピーを実行
-    CopyFnc path(0), path(1)
+    flag = CopyFnc(path(0), path(1), checkDrive)
+    If flag = False Then
+        MsgBox "終了します"
+        WScript.Quit
+    End If
     ' ------------------------ '
 
     ' ------------------------ '
@@ -47,13 +51,15 @@ Else
 End If
 ' -------------------------------------------------------------- '
 
-Function CopyFnc(str_from, str_to)
+Function CopyFnc(str_from, str_to, checkDrive)
     'コピーを実行
 
-    Dim flag : flag = CheckCapacity("C", str_from)
+    Dim objFS : Set objFS = CreateObject("Scripting.FilesystemObject")
+
+    Dim flag : flag = CheckCapacity(checkDrive, str_from)
     If flag  = True Then
 
-        infoPathFlag = MsgBox("コピー元フォルダ: " + str_from &vbCrLf& "コピー先フォルダ: " + str_to &vbCrLf& "コピーを開始してよろしいですか？", vbOKCancel+vbQuestion, "info")
+        Dim infoPathFlag : infoPathFlag = MsgBox("コピー元フォルダ: " + str_from &vbCrLf& "コピー先フォルダ: " + str_to &vbCrLf& "コピーを開始してよろしいですか？", vbOKCancel+vbQuestion, "info")
 
         If infoPathFlag = vbOK Then
 
@@ -61,9 +67,13 @@ Function CopyFnc(str_from, str_to)
 
             MsgBox "コピーが完了しました"
 
+            CopyFnc = True
+
         Else
 
             MsgBox "コピー先フォルダやコピー元フォルダの設定は [setUpScript] を実行して設定してください", vbOKOnly, "info"
+
+            CopyFnc = False
 
         End If
 
@@ -71,25 +81,27 @@ Function CopyFnc(str_from, str_to)
 
         MsgBox "コピーするには容量が足りません"
 
+        CopyFnc = False
+
     End If
 End Function
 
-Function ReadPath()
+Function ReadPath(dataPathPC, dataPathCD)
     'CDへコピーする
 
     ' -------------------------------------------------------------- '
     'コピー先, コピー元 パスを取得
 
     'コピー元パスデータ格納ファイル
-    strFromFile = "./data/PC_tg_path.txt"
-    strToFile = "./data/CD_tg_path.txt"
+    Dim strFromFile : strFromFile = dataPathPC
+    Dim strToFile : strToFile = dataPathCD
 
-    Set objFS = CreateObject("Scripting.FilesystemObject")
-    Set objTextFrom = objFS.OpenTextFile(strFromFile)
-    Set objTextTo = objFS.OpenTextFile(strToFile)
+    Dim objFS : Set objFS = CreateObject("Scripting.FilesystemObject")
+    Dim objTextFrom : Set objTextFrom = objFS.OpenTextFile(strFromFile)
+    Dim objTextTo : Set objTextTo = objFS.OpenTextFile(strToFile)
 
-    str_from_data = ""
-    str_to_data = ""
+    Dim str_from_data : str_from_data = ""
+    Dim str_to_data : str_to_data = ""
     Do While objTextFrom.AtEndOfLine <> True
         str_from_data = objTextFrom.ReadLine
     Loop
@@ -107,15 +119,11 @@ End Function
 
 Function CheckCapacity(tgDrive, tgFolder)
     '容量が足りるかの判定
-    
-    Dim objFSO
-    Dim objFolder
-    Dim objDrive
 
-    Set objFSO = WScript.CreateObject("Scripting.FileSystemObject")
+    Dim objFSO : Set objFSO = WScript.CreateObject("Scripting.FileSystemObject")
 
-    Set objDrive = objFSO.GetDrive(tgDrive)
-    Set objFolder = objFSO.GetFolder(tgFolder)
+    Dim objDrive : Set objDrive = objFSO.GetDrive(tgDrive)
+    Dim objFolder : Set objFolder = objFSO.GetFolder(tgFolder)
 
     If objDrive.FreeSpace > objFolder.Size Then
 
