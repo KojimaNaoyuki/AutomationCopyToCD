@@ -4,16 +4,16 @@ Option Explicit
 '初期設定
 
 '絶対パスで指定する
-Dim VBAFilePath : VBAFilePath = "E:\趣味\AutomationCopyToCD\VBA\CopyXlsx.xlsm"
+Dim VBAFilePath : VBAFilePath = "D:\趣味\AutomationCopyToCD\VBA\CopyXlsx.xlsm"
 
 'コピー先ドライブを指定する
-Dim checkDrive : checkDrive = "E"
+Dim checkDrive : checkDrive = "D"
 
 'コピー元パス格納ファイルのパスを指定する
-Dim dataPathPC : dataPathPC = "E:\趣味\AutomationCopyToCD\data\PC_tg_path.txt"
+Dim dataPathPC : dataPathPC = "D:\趣味\AutomationCopyToCD\data\PC_tg_path.txt"
 
 'コピー先パス格納ファイルのパスを指定する
-Dim dataPathCD : dataPathCD = "E:\趣味\AutomationCopyToCD\data\CD_tg_path.txt"
+Dim dataPathCD : dataPathCD = "D:\趣味\AutomationCopyToCD\data\CD_tg_path.txt"
 
 ' -------------------------------------------------------------- '
 
@@ -37,10 +37,15 @@ If flag = vbYes Then
     End If
     ' ------------------------ '
 
-    ' ------------------------ '
-    'VBAを実行して画像を印刷する
-    VBARunFn(VBAFilePath)
-    ' ------------------------ '
+    flag = MsgBox("印刷しますか？", vbYesNo+vbQuestion, "info")
+    IF flag = vbYes Then
+
+        ' ------------------------ '
+        'VBAを実行して画像を印刷する
+        VBARunFn(VBAFilePath)
+        ' ------------------------ '
+
+    End If
 
     MsgBox "終了します"
 

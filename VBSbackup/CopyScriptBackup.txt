@@ -37,10 +37,15 @@ If flag = vbYes Then
     End If
     ' ------------------------ '
 
-    ' ------------------------ '
-    'VBAを実行して画像を印刷する
-    VBARunFn(VBAFilePath)
-    ' ------------------------ '
+    flag = MsgBox("印刷しますか？", vbYesNo+vbQuestion, "info")
+    IF flag = vbYes Then
+
+        ' ------------------------ '
+        'VBAを実行して画像を印刷する
+        VBARunFn(VBAFilePath)
+        ' ------------------------ '
+
+    End If
 
     MsgBox "終了します"
 
